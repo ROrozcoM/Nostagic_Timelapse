@@ -75,6 +75,8 @@ def is_image_black(image, threshold=0.95):
     return black_pixel_ratio > threshold
 def generate_images(bounds):
     wms_hist = WebMapService('http://www.ign.es/wms/pnoa-historico', version='1.1.1')
+    wms_act = WebMapService('http://www.ign.es/wms-inspire/pnoa-ma', version='1.1.1')
+    img_list = []
 
     layers = [
         'PNOA2019', 'PNOA2018', 'PNOA2017', 'PNOA2016', 'PNOA2015', 'PNOA2014', 'PNOA2013',
@@ -85,8 +87,6 @@ def generate_images(bounds):
     ]
     # Invertir el orden de las capas
     layers.reverse()
-
-    img_list = []
 
     for layer in layers:
         img_response = wms_hist.getmap(
@@ -104,5 +104,23 @@ def generate_images(bounds):
             img.save(buffer, format="JPEG")
             img_str = base64.b64encode(buffer.getvalue()).decode("utf-8")
             img_list.append((img_str, layer))
+
+    img_act = wms_act.getmap(layers=['OI.OrthoimageCoverage'],
+                             # styles=['default'],
+                             size=[600, 400],
+                             srs='EPSG:25830',
+                             # bbox=(f_bounds['minx'].min(), f_bounds['maxx'].max(), f_bounds['miny'].min(), f_bounds['maxy'].max()),
+                             bbox=bounds,
+                             # bbox=(f_bounds[0], f_bounds[2], f_bounds[1], f_bounds[3]),
+                             # size=img_size,
+                             format='image/jpeg',
+                             transparent=True
+                             )
+    img_2022 = Image.open(BytesIO(img_act.read()))
+    if not is_image_black(img_2022):
+        buffer = BytesIO()
+        img_2022.save(buffer, format="JPEG")
+        img_str = base64.b64encode(buffer.getvalue()).decode("utf-8")
+        img_list.append((img_str, '2022'))
 
     return img_list

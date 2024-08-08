@@ -9,6 +9,7 @@ from shapely.geometry import shape
 import json
 from dash.exceptions import PreventUpdate
 from pyproj import Transformer
+import dash_bootstrap_components as dbc
 
 
 
@@ -38,18 +39,59 @@ app.layout = dmc.MantineProvider(
     [
             dmc.Card(
                 children=[
+                    html.Br(),
                     dmc.CardSection([
                         dmc.Grid(
                             children=[
-                                dmc.Button("Accept", id="button-submit-sector", disabled=True),
-                                dmc.Button("Cancel", id="button-cancel"),
+                                dmc.Title("Visualizador de evolución temporal", order=1),
                             ],
                             justify="center",
                             align="stretch",
                             gutter="xl",
                         ),
                     ],
-                    withBorder=True,
+                    #withBorder=True,
+                    inheritPadding=True,
+                    py="xs",
+                    ),
+                    html.Br(),
+                    dmc.Stepper(
+                        style={"marginLeft": "20%", "marginRight": "20%"},
+                        active=1,
+                        children=[
+                            dmc.StepperStep(
+                                label="Paso 1",
+                                description="Busca región de interés",
+                            ),
+                            dmc.StepperStep(
+                                label="Paso 2",
+                                description="Selecciona región de interés",
+                                children=dmc.Text(
+                                    "Usa el icono del pentágono que aparece en el mapa y completa un polígono cerrado",
+                                    ta="center"),
+                            ),
+                            dmc.StepperStep(
+                                label="Paso 3",
+                                description="Pulsa Aceptar",
+                            ),
+
+                        ],
+                    ),
+                    html.Br(),
+                    dmc.CardSection([
+                        dmc.Grid(
+                            children=[
+                                dmc.Button("Aceptar", id="button-submit-sector", disabled=True),
+                                dmc.Space(w=20),
+                                dcc.Location(id='url-refresh', refresh=True),
+                                dmc.Button("Cancelar", id="button-cancel"),
+                            ],
+                            justify="center",
+                            align="stretch",
+                            gutter="xl",
+                        ),
+                    ],
+                    #withBorder=True,
                     inheritPadding=True,
                     py="xs",
                     ),
@@ -76,10 +118,13 @@ app.layout = dmc.MantineProvider(
                                 dmc.GridCol(generate_map(),span=5),
                                 dmc.GridCol(
                                     dmc.Card(
-                                    [dmc.GridCol(dcc.Loading(html.Div(id="dummy-output")), span='auto'),],
+                                    dcc.Loading(html.Div(id="dummy-output")),
                                     withBorder=True,
                                     shadow="sm",
                                     radius="md",
+                                    style={"display": "flex",
+                                           "justifyContent": "center",
+                                           "alignItems": "center",}
                                     ),
                                 span='auto'),
                             ],
@@ -97,7 +142,7 @@ app.layout = dmc.MantineProvider(
                 shadow="sm",
                 radius="md",
 
-            )
+            ),
             ],
     id="mantine-provider",
     forceColorScheme="light",
@@ -152,17 +197,37 @@ def update_output(n_clicks, bounds):
     if n_clicks is not None and bounds:
         img_list = generate_images(bounds)
 
-        # Crear el grid con cada imagen en una columna
-        grid_cols = [dmc.GridCol([
-            html.Img(src=f"data:image/jpeg;base64,{img_src}", style={"max-width": "100%", "border": "1px solid #ddd", "padding": "10px"}),
-            html.P(layer_name, style={"textAlign": "center", "margin": "5px"})
-            ])
-                     for img_src, layer_name in img_list]
-        grid = dmc.Grid(children=grid_cols)  # Ajustar el número de columnas según sea necesario
+        # Crear los items para el carrusel
+        carousel_items = [
+            {
+                "key": str(i),
+                "src": f"data:image/jpeg;base64,{img_src}",
+                "header": layer_name,
+                "caption": "Ortofoto",
+            }
+            for i, (img_src, layer_name) in enumerate(img_list)
+        ]
 
-        return grid
+        # Crear el carrusel usando los items generados
+        carousel = dbc.Carousel(
+            items=carousel_items,
+            controls=True,
+            indicators=True,
+            ride='carousel',
+        )
+
+        return carousel
     else:
         return "No se recibieron bounds o no se ha hecho clic en el botón."
+
+@callback(
+    Output('url-refresh', 'href'),
+    Input('button-cancel', 'n_clicks'),
+    prevent_initial_call=True
+)
+def refresh_page(n_clicks):
+    if n_clicks:
+        return '/'  # Recarga la página actual
 
 if __name__ == "__main__":
     app.run_server(debug=True)
