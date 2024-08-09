@@ -214,4 +214,4 @@ def refresh_page(n_clicks):
         return '/'  # Recarga la página actual
 
 if __name__ == "__main__":
-    app.run_server(debug=True)
+    app.run_server(debug=False)
