@@ -26,8 +26,8 @@ stylesheets = [
     "https://unpkg.com/@mantine/nprogress@7/styles.css",
 ]
 
-app = Dash(external_stylesheets=stylesheets)
-
+app = Dash(__name__,external_stylesheets=stylesheets)
+server = app.server
 
 
 style = {
