@@ -1,13 +1,7 @@
 import dash_mantine_components as dmc
-from dash_iconify import DashIconify
-from dash import Dash, _dash_renderer, dcc, callback, Input, Output, State, clientside_callback, html
-import plotly.express as px
-import pandas as pd
-import plotly.graph_objects as go
+from dash import Dash, _dash_renderer, dcc, callback, Input, Output, State, html
 from components import generate_map, generate_images
 from shapely.geometry import shape
-import json
-from dash.exceptions import PreventUpdate
 from pyproj import Transformer
 import dash_bootstrap_components as dbc
 
@@ -214,4 +208,4 @@ def refresh_page(n_clicks):
         return '/'  # Recarga la página actual
 
 if __name__ == "__main__":
-    app.run_server(debug=False)
+    app.run_server(debug=True)

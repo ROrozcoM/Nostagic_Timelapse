@@ -1,17 +1,8 @@
-import dash_mantine_components as dmc
-from dash_iconify import DashIconify
 import dash_leaflet as dl
-import pytz
-import owslib
 from owslib.wms import WebMapService
-from owslib.wfs import WebFeatureService
-from owslib.fes import PropertyIsEqualTo, FilterRequest,  PropertyIsLessThanOrEqualTo, PropertyIsGreaterThanOrEqualTo, PropertyIsBetween
-from owslib.etree import etree
-from PIL import Image, ImageDraw
+from PIL import Image
 import base64
 from io import BytesIO
-import matplotlib.pyplot as plt
-import matplotlib.gridspec as gridspec
 import numpy as np
 
 
