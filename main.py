@@ -60,9 +60,9 @@ app.layout = dmc.MantineProvider(
                             dmc.StepperStep(
                                 label="Paso 2",
                                 description="Selecciona región de interés",
-                                children=dmc.Text(
-                                    "Usa el icono del pentágono que aparece en el mapa y completa un polígono cerrado",
-                                    ta="center"),
+                                # children=dmc.Text(
+                                #     "Usa el icono del pentágono que aparece en el mapa y completa un polígono cerrado",
+                                #     ta="center"),
                             ),
                             dmc.StepperStep(
                                 label="Paso 3",
@@ -109,18 +109,7 @@ app.layout = dmc.MantineProvider(
                     dmc.CardSection([
                         dmc.Grid(
                             children=[
-                                dmc.GridCol(generate_map(),span=5),
-                                dmc.GridCol(
-                                    dmc.Card(
-                                    dcc.Loading(html.Div(id="dummy-output")),
-                                    withBorder=True,
-                                    shadow="sm",
-                                    radius="md",
-                                    style={"display": "flex",
-                                           "justifyContent": "center",
-                                           "alignItems": "center",}
-                                    ),
-                                span='auto'),
+                                dmc.GridCol(generate_map(),span='auto'),
                             ],
                             justify="center",
                             align="stretch",
@@ -137,6 +126,16 @@ app.layout = dmc.MantineProvider(
                 radius="md",
 
             ),
+            dmc.Card(
+            dcc.Loading(html.Div(id="dummy-output")),
+            withBorder=True,
+            shadow="sm",
+            radius="md",
+            style={"display": "flex",
+                   "justifyContent": "center",
+                   "alignItems": "center",}
+            ),
+
             ],
     id="mantine-provider",
     forceColorScheme="light",
@@ -175,26 +174,19 @@ def update_output(n_clicks, bounds):
     if n_clicks is not None and bounds:
         img_list = generate_images(bounds)
 
-        # Crear los items para el carrusel
-        carousel_items = [
-            {
-                "key": str(i),
-                "src": f"data:image/jpeg;base64,{img_src}",
-                "header": layer_name,
-                "caption": "Ortofoto",
-            }
-            for i, (img_src, layer_name) in enumerate(img_list)
+        # Crear la lista de imágenes con sus nombres
+        images_layout = [
+            html.Div(
+                children=[
+                    html.Img(src=f"data:image/jpeg;base64,{img_src}", style={"display": "block", "margin": "0 auto"}),
+                    html.P(layer_name, style={"text-align": "center", "font-weight": "bold"})
+                ],
+                style={"margin-bottom": "20px"}  # Espaciado entre imágenes
+            )
+            for img_src, layer_name in img_list
         ]
 
-        # Crear el carrusel usando los items generados
-        carousel = dbc.Carousel(
-            items=carousel_items,
-            controls=True,
-            indicators=True,
-            ride='carousel',
-        )
-
-        return carousel
+        return html.Div(images_layout)
     else:
         return "No se recibieron bounds o no se ha hecho clic en el botón."
 

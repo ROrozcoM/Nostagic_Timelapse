@@ -33,7 +33,7 @@ def generate_map(latitude=37.859836595170066, longitude=-4.796388111895123):
         ),
     ],
         center=[latitude, longitude],
-        style={"width": "100%", "height": "700px","borderRadius": "20px", "border": "2px solid #ccc", "zIndex": "1"},
+        style={"width": "100%", "height": "400px","borderRadius": "20px", "border": "2px solid #ccc", "zIndex": "1"},
         zoom=15,
         maxZoom=28,
         zoomControl=False,
