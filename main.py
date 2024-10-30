@@ -1,8 +1,9 @@
 import dash_mantine_components as dmc
 from dash import Dash, _dash_renderer, dcc, callback, Input, Output, State, html
-from components import generate_map, generate_images
+from components import generate_map, generate_images, make_card
 from shapely.geometry import shape
 from pyproj import Transformer
+from dash_iconify import DashIconify
 import dash_bootstrap_components as dbc
 
 
@@ -20,8 +21,9 @@ stylesheets = [
     "https://unpkg.com/@mantine/nprogress@7/styles.css",
 ]
 
-app = Dash(__name__,external_stylesheets=stylesheets)
+app = Dash(__name__,external_stylesheets=dmc.styles.ALL)
 server = app.server
+app.title='Nostalgic Visualizator'
 
 
 style = {
@@ -31,112 +33,122 @@ style = {
 
 app.layout = dmc.MantineProvider(
     [
-            dmc.Card(
-                children=[
-                    html.Br(),
-                    dmc.CardSection([
-                        dmc.Grid(
-                            children=[
-                                dmc.Title("Visualizador de evolución temporal", order=1),
-                            ],
-                            justify="center",
-                            align="stretch",
-                            gutter="xl",
-                        ),
-                    ],
-                    #withBorder=True,
-                    inheritPadding=True,
-                    py="xs",
-                    ),
-                    html.Br(),
-                    dmc.Stepper(
-                        style={"marginLeft": "20%", "marginRight": "20%"},
-                        active=1,
+        dmc.Card(
+            children=[
+                html.Br(),
+                dmc.CardSection([
+                    dmc.Grid(
                         children=[
-                            dmc.StepperStep(
-                                label="Paso 1",
-                                description="Busca región de interés",
-                            ),
-                            dmc.StepperStep(
-                                label="Paso 2",
-                                description="Selecciona región de interés",
-                                # children=dmc.Text(
-                                #     "Usa el icono del pentágono que aparece en el mapa y completa un polígono cerrado",
-                                #     ta="center"),
-                            ),
-                            dmc.StepperStep(
-                                label="Paso 3",
-                                description="Pulsa Aceptar",
-                            ),
-
+                            dmc.Title("Nostalgic Visualizator", order=2),
                         ],
+                        justify="center",
+                        align="stretch",
+                        style={'textAlign': 'center'}
                     ),
-                    html.Br(),
-                    dmc.CardSection([
-                        dmc.Grid(
-                            children=[
-                                dmc.Button("Aceptar", id="button-submit-sector", disabled=True),
-                                dmc.Space(w=20),
-                                dcc.Location(id='url-refresh', refresh=True),
-                                dmc.Button("Cancelar", id="button-cancel"),
+                ],
+                inheritPadding=True,
+                py="xs",
+                ),
+                html.Br(),
+                dmc.List(
+                    size="sm",
+                    spacing="sm",
+                    children=[
+                        dmc.ListItem(
+                            "Busca región de interés en el mapa",
+                            icon=dmc.ThemeIcon("1", radius="xl", color="teal", size=20)
+                        ),
+                        dmc.ListItem(
+                            [
+                                html.Span("Puedes cambiar el tipo de mapa pulsando "),
+                                html.Span(dmc.Kbd("Layers")),
                             ],
-                            justify="center",
-                            align="stretch",
-                            gutter="xl",
+                            icon=dmc.ThemeIcon("*", radius="xl", color="orange", size=18),
+                            style={'fontSize': '10px'}
+                        ),
+                        dmc.ListItem(
+                            [
+                                html.Span("Selecciona tu región de interés pulsando "),
+                                html.Span(dmc.Kbd("⬠")),
+                                html.Span(" y dibujando el trazado"),
+                            ],
+                            icon=dmc.ThemeIcon("2", radius="xl", color="teal", size=20)
+                        ),
+                        dmc.ListItem(
+                            [
+                                html.Span("Completa el polígono con el punto de inicio y pulsa "),
+                                html.Span(dmc.Kbd("Aceptar")),
+                            ],
+                            icon=dmc.ThemeIcon("3", radius="xl", color="teal", size=20)
                         ),
                     ],
-                    #withBorder=True,
-                    inheritPadding=True,
-                    py="xs",
+                    style={'fontSize': '12px'}
+                ),
+                html.Br(),
+                dmc.CardSection([
+                    dmc.Grid(
+                        children=[
+                            dmc.Button("Aceptar", id="button-submit-sector", disabled=False),
+                            dmc.Space(w=20),
+                            dcc.Location(id='url-refresh', refresh=True),
+                            dmc.Button("Refrescar", id="button-cancel"),
+                        ],
+                        justify="center",
+                        align="stretch",
+                        gutter="xl",
                     ),
+                ],
+                inheritPadding=True,
+                py="xs",
+                ),
 
-                    dmc.CardSection([
-                        dmc.Grid(
-                            children=[
-                                dmc.GridCol(html.Div(id='new-coordinates-content'),span=6),
-                                dcc.Store(id="new_sector-template"),
-                            ],
-                            justify="center",
-                            align="stretch",
-                            gutter="xl",
-                        ),
-                    ],
-                        withBorder=True,
-                        #inheritPadding=True,
-                        py="xs",
-                    ),
+                # DCC Store para manejar el estado del mapa
+                dcc.Store(id='map-visible', data=True),  # Por defecto el mapa es visible
 
-                    dmc.CardSection([
-                        dmc.Grid(
-                            children=[
-                                dmc.GridCol(generate_map(),span='auto'),
-                            ],
-                            justify="center",
-                            align="stretch",
-                            gutter="xl",
-                        ),
-                    ],
-                        withBorder=True,
-                        inheritPadding=True,
-                        py="xs",
+                dmc.CardSection([
+                    dmc.Grid(
+                        children=[
+                            dmc.GridCol(html.Div(id='new-coordinates-content'), span=6),
+                            dcc.Store(id="new_sector-template"),
+                        ],
+                        justify="center",
+                        align="stretch",
+                        gutter="xl",
                     ),
                 ],
                 withBorder=True,
-                shadow="sm",
-                radius="md",
+                py="xs",
+                ),
 
-            ),
-            dmc.Card(
-            dcc.Loading(html.Div(id="dummy-output")),
+                dmc.CardSection([
+                    dmc.Grid(
+                        children=[
+                            dmc.GridCol(id='map-content', children=generate_map(), span='auto'),  # Mostrar el mapa inicialmente
+                        ],
+                        justify="center",
+                        align="stretch",
+                        gutter="xl",
+                    ),
+                ],
+                withBorder=True,
+                inheritPadding=True,
+                py="xs",
+                ),
+            ],
+            withBorder=True,
+            shadow="sm",
+            radius="md",
+        ),
+        dmc.Card(
+            dcc.Loading(html.Div(id="dummy-output")),  # Contenido a mostrar después de pulsar Aceptar
             withBorder=True,
             shadow="sm",
             radius="md",
             style={"display": "flex",
                    "justifyContent": "center",
                    "alignItems": "center",}
-            ),
-
-            ],
+        ),
+    ],
     id="mantine-provider",
     forceColorScheme="light",
 )
@@ -174,21 +186,22 @@ def update_output(n_clicks, bounds):
     if n_clicks is not None and bounds:
         img_list = generate_images(bounds)
 
-        # Crear la lista de imágenes con sus nombres
-        images_layout = [
-            html.Div(
-                children=[
-                    html.Img(src=f"data:image/jpeg;base64,{img_src}", style={"display": "block", "margin": "0 auto"}),
-                    html.P(layer_name, style={"text-align": "center", "font-weight": "bold"})
-                ],
-                style={"margin-bottom": "20px"}  # Espaciado entre imágenes
-            )
-            for img_src, layer_name in img_list
-        ]
+        # Wrap slides in a Carousel component
+        carousel = dmc.Carousel(
+            children=[dmc.CarouselSlide(make_card(img_src, layer_name)) for img_src, layer_name in img_list],
+            id="carousel-drag-free",
+            withIndicators=True,
+            height=300,
+            dragFree=True,
+            slideGap="md",
+            loop=True,
+            align="start",
+            style={"maxWidth": "800px", "margin": "0 auto"},
+        )
 
-        return html.Div(images_layout)
+        return html.Div(carousel)
     else:
-        return "No se recibieron bounds o no se ha hecho clic en el botón."
+        return "No bounds received or the button was not clicked."
 
 @callback(
     Output('url-refresh', 'href'),
@@ -198,6 +211,17 @@ def update_output(n_clicks, bounds):
 def refresh_page(n_clicks):
     if n_clicks:
         return '/'  # Recarga la página actual
+
+@callback(
+    Output('map-visible', 'data'),
+    Output('map-content', 'children'),
+    Input('button-submit-sector', 'n_clicks'),
+    prevent_initial_call=True
+)
+def update_map(n_clicks):
+    # Cambia el estado para ocultar el mapa y mostrar el contenido de carga
+    return False, dcc.Loading(html.Div(id="dummy-output"))
+
 
 if __name__ == "__main__":
     app.run_server(debug=True)

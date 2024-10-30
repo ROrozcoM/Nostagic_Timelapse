@@ -4,7 +4,8 @@ from PIL import Image
 import base64
 from io import BytesIO
 import numpy as np
-
+import dash_mantine_components as dmc
+from dash import html
 
 mapbox_url = "https://api.mapbox.com/styles/v1/{user}/{id}/tiles/{{z}}/{{x}}/{{y}}@2x?access_token={access_token}"
 def generate_map(latitude=37.859836595170066, longitude=-4.796388111895123):
@@ -115,3 +116,37 @@ def generate_images(bounds):
         img_list.append((img_str, '2022'))
 
     return img_list
+
+def make_card(image, title):
+    return dmc.Paper(
+        [
+            html.Div(
+                [
+                    dmc.Text(title, c="black", opacity=0.8, fw=700),
+                    html.Img(
+                        src=f"data:image/jpeg;base64,{image}",
+                        style={
+                            "width": "100%",  # Make image full width of the container
+                            "height": "500px",  # Fixed height for uniformity
+                            "objectFit": "cover",  # Maintain aspect ratio, crop to fit
+                        }
+                    ),
+                ]
+            ),
+            dmc.Button("Read Article", variant="white", color="dark"),
+        ],
+        shadow="md",
+        p="xl",
+        radius="md",
+        style={
+            "backgroundImage": f"",
+            "height": "440px",  # Fixed height for the card
+            "display": "flex",
+            "flexDirection": "column",
+            "justifyContent": "space-between",
+            "alignItems": "flex-start",
+            "backgroundSize": "cover",
+            "backgroundPosition": "center",
+            "backgroundColor": "#f0f0f0",  # Fallback color if image does not load
+        },
+    )
