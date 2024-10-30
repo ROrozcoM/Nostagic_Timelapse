@@ -1,6 +1,7 @@
 # Nostagic_Timelapse
 
 Welcome to the **Nostagic_Timelapse**! This interactive application allows you to explore different regions on a map, analyze temporal data, and make selections of areas of interest in an intuitive and visual manner. The interface is designed to facilitate use and provide a smooth and engaging experience.
+"It is originally designed for mobile devices."
 
 ## Live Demo
 
