@@ -5,7 +5,7 @@ Welcome to the **Nostagic_Timelapse**! This interactive application allows you t
 
 ## Live Demo
 
-The Temporal Evolution Viewer is already deployed and accessible via the following link: [Click here](https://nostalgicvisualizator.ey.r.appspot.com/).
+The Temporal Evolution Viewer is already deployed and accessible via the following link: [Click here](https://visualizadorpnoa.ey.r.appspot.com/).
 
 
 ## How to Use the Application
